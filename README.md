@@ -1,5 +1,5 @@
 # JellyKnife
-Bind your Android [Data Binding](https://developer.android.com/topic/libraries/data-binding/index.html) views to your fields with annotations. 
+Bind your Android [Data Binding](https://developer.android.com/topic/libraries/data-binding/index.html) views to your fields with annotations. Data Binding allows you to not have to reference as many Views in code any more, but it's still inevitable for Views that need to be tied to the framework or have custom logic.
 
 ## Use
 ```java
