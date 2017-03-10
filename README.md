@@ -33,7 +33,7 @@ Rather than binding the fields to the views through `R.id` magic like Butterknif
 Even though the Data Binding library generates the View fields for you, using that library alone can still lead to a fair amount of boilerplate such as having to preface all of your View accessing in the code with `myBinding.` and `myBinding.innerBinding.` (these names are examples) like so:
 
 ```java
-binding.textView.setText("Hello world!");
+binding.navView.setNavigationItemSelectedListener(this);
 setSupportToolbar(binding.innerBinding.toolbar);
 binding.recyclerView.setAdapter(adapter);
 ```
@@ -41,7 +41,7 @@ binding.recyclerView.setAdapter(adapter);
 or through field setting boilerplate such as:
 
 ```java
-TextView textView;
+NavigationView navView;
 Toolbar toolbar;
 RecyclerView recyclerView;
 FloatingActionButton fab;
@@ -51,10 +51,10 @@ protected void onCreate(Bundle savedInstanceState) {
   super.onCreate(savedInstanceState);
   ActivityHomeBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_home);
         
-  textView = binding.textView;
-  toolbar = binding.innerBinding.toolbar;
-  recyclerView = binding.recyclerView;
-  fab = binding.innerBinding.toolbar;
+  this.navView = binding.navView;
+  this.toolbar = binding.innerBinding.toolbar;
+  this.recyclerView = binding.recyclerView;
+  this.fab = binding.innerBinding.toolbar;
 }
 ```
 
