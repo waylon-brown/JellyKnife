@@ -9,6 +9,14 @@ import java.util.List;
 
 import timber.log.Timber;
 
+/**
+ * Binds Views provided in generated {@link ViewDataBinding} classes to View fields annotated
+ * with {@link Bind}.
+ * 
+ * The {@link ViewDataBinding} class can be provided either with 
+ *     1) The {@link DataBinding} annotation and using {@link #bind(Object)}.
+ *     2) By just passing it in with {@link #bind(Object, ViewDataBinding)}.
+ */
 public class JellyKnife {
 
     /**
@@ -17,13 +25,13 @@ public class JellyKnife {
      * @param target
      */
     public static void bind(Object target) {
-        ViewDataBinding binding = null;
-        try {
-            binding = getViewDataBinding(target);
-        } catch (IllegalAccessException | IllegalStateException e) {
-            e.printStackTrace();
-        }
-        bind(target, binding);
+        ViewDataBinding binding = getViewDataBinding(target);
+        if (binding != null) {
+            bind(target, binding);
+        } else {
+            throw new IllegalStateException("No field found in the class " + target.getClass().getName() +
+                    " with the DataBinding annotation, did you mean to call bind(Object target, ViewDataBinding binding)?");
+        } 
     }
 
     /**
@@ -33,24 +41,18 @@ public class JellyKnife {
      * @param binding
      */
     public static void bind(Object target, ViewDataBinding binding) {
-        try {
-            if (binding != null) {
-                bindFields(target, binding);
-            } else {
-                Timber.e("No field was annotated with DataBinding");
-                return;
-            }
-        } catch (IllegalAccessException | IllegalStateException | ClassCastException e) {
-            // Each of the thrown exceptions should cause an app crash - fail early.
-            throw new RuntimeException(e);
+        if (binding != null) {
+            bindFields(target, binding);
+        } else {
+            Timber.e("No field was annotated with DataBinding");
+            return;
         }
     }
 
-    private static ViewDataBinding getViewDataBinding(Object target) throws IllegalAccessException {
+    private static ViewDataBinding getViewDataBinding(Object target) {
         for (Field field : target.getClass().getDeclaredFields()) {
             DataBinding annotation = field.getAnnotation(DataBinding.class);
             if (annotation != null) {
-                Timber.d("DataBinding annotation on field '" + field.getName() + "'.");
                 try {
                     if (field.get(target) instanceof ViewDataBinding) {
                         return (ViewDataBinding)field.get(target);
@@ -60,45 +62,43 @@ public class JellyKnife {
                         throw new IllegalStateException("DataBinding field '" + field.getName() + "' is not an instance of ViewDataBinding.");
                     }
                 } catch (IllegalAccessException e) {
-                    throw new IllegalAccessException("DataBinding field '" + field.getName() + "' isn't declared public.");
+                    // Rethrow a Runtime exception
+                    throw new IllegalStateException("DataBinding field '" + field.getName() + "' isn't declared public.");
                 }
             }
         }
         return null;
     }
 
-    private static void bindFields(Object target, ViewDataBinding binding) throws IllegalAccessException {
+    private static void bindFields(Object target, ViewDataBinding binding) {
         for (Field field : target.getClass().getDeclaredFields()) {
             Bind annotation = field.getAnnotation(Bind.class);
             if (annotation != null) {
-                Timber.d("Binding annotation on field '" + field.getName() + "'.");
                 bindField(field, target, binding);
             }
         }
     }
 
-    private static void bindField(Field field, Object target, ViewDataBinding binding) throws IllegalAccessException {
+    private static void bindField(Field field, Object target, ViewDataBinding binding) {
         try {
-            // Failing early, TODO: change
-            // ClassCastException
-            field.getType().asSubclass(View.class);
-            // IllegalAccessException
-            field.get(target);
-            
-            List<ViewDataBinding> viewDataBindingList = new ArrayList<>();
-            viewDataBindingList.add(binding);
-            View bindingView = getViewFromBinding(field.getName(), viewDataBindingList);
-            
-            if (bindingView != null) {
-                field.set(target, bindingView);
+            // Field is of type View
+            if (View.class.isAssignableFrom(field.getType())) {
+                List<ViewDataBinding> viewDataBindingList = new ArrayList<>();
+                viewDataBindingList.add(binding);
+                View bindingView = getViewFromBinding(field.getName(), viewDataBindingList);
+
+                if (bindingView != null) {
+                    field.set(target, bindingView);
+                } else {
+                    throw new IllegalStateException("No View in " + binding.getClass() + " was found with the name '" + field.getName() + "'.");
+                }
             } else {
-                throw new IllegalStateException("No View in " + binding.getClass() + " was found with the name '" + field.getName() + "'.");
+                throw new IllegalStateException("Binding field '" + field.getName() + "' wasn't of type View.");
             }
-        } catch (ClassCastException e) {
-            throw new ClassCastException("Binding field '" + field.getName() + "' wasn't of type View.");
         } catch (IllegalAccessException e) {
-            throw new IllegalAccessException("Binding field '" + field.getName() + "' isn't declared public.");
-        }
+            // Rethrow a Runtime exception
+            throw new IllegalStateException("Binding field '" + field.getName() + "' isn't declared public.");
+        } 
     }
 
     /**
@@ -123,13 +123,9 @@ public class JellyKnife {
             if (field.getName().equals(name)) {
                 return (View)field.get(binding);
             } else {
-                // TODO: clean up
-                try {
-                    // Throws exception if isn't a ViewDataBinding
-                    field.getType().asSubclass(ViewDataBinding.class);
+                // Field is of type ViewDataBinding
+                if (ViewDataBinding.class.isAssignableFrom(field.getType())) {
                     viewDataBindingList.add((ViewDataBinding)field.get(binding));
-                } catch (ClassCastException e) {
-                    // Do nothing, isn't of type ViewDataBinding
                 }
             }
         }
