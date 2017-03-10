@@ -64,7 +64,7 @@ All JellyKnife does is find your annotations, and point those fields to the appr
 * The field annotated with `@DataBinding` is a subclass of type `ViewDataBinding`
 * Each field annotated with `@Bind` is a View
 * Each field is public
-* Each field exists within the `ViewDataBinding` with the same name 
+* Each View field exists within the `ViewDataBinding` with the same name 
 
 The library will crash the app immediately and let you know if it was set up incorrectly.
 
