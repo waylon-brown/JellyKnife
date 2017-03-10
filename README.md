@@ -66,7 +66,7 @@ All JellyKnife does is find your annotations, and point those fields to the appr
 * Each field is public
 * Each View field exists within the `ViewDataBinding` with the same name 
 
-The library will crash the app immediately and let you know if it was set up incorrectly.
+If any of this was set up incorrectly, the library will crash the app immediately and let you know what was wrong.
 
 ## What's this solving over just using Android Data Binding + ButterKnife?
 Really, just that it's more lightweight.  If you're already using Data Binding, you might find that using JellyKnife with it solves your same use cases with much less code since Data Binding is already doing a lot of heavy lifting. *This is a very small library.* 
