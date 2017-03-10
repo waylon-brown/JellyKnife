@@ -69,6 +69,6 @@ All JellyKnife does is find your annotations, and point those fields to the appr
 The library will crash the app immediately and let you know if it was set up incorrectly.
 
 ## What's this solving over just using Android Data Binding + ButterKnife?
-Really, just that it's more lightweight. By using Data Binding + JellyKnife, you might find that it solves your same use cases with much less code since Data Binding is already doing a lot of heavy lifting. *This is a very small library.* 
+Really, just that it's more lightweight.  If you're already using Data Binding, you might find that using JellyKnife with it solves your same use cases with much less code since Data Binding is already doing a lot of heavy lifting. *This is a very small library.* 
 
 The only difference at all to you as the developer is that the annotations don't require the view's IDs to be passed in. That, and it has less features. JellyKnife will fit your use case if you use ButterKnife purely for the @BindView annotations and nothing else, it's not up to complete feature parity with it and doesn't strive to be.
